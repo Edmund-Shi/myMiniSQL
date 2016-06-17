@@ -9,7 +9,7 @@ class RecordManager
 public:
 	RecordManager(BufferManager *bf):buf_ptr(bf){}
 	~RecordManager();
-	bool isSatisfied(Table& tableinfor, tuper row, vector<int> mask, where w);
+	bool isSatisfied(Table& tableinfor, tuper row, vector<int> mask, vector<where> w);
 	Table Select(Table& tableIn, vector<int>attrSelect, vector<int>mask, vector<where> w);
 	Table Select(Table& tableIn, vector<int>attrSelect);
 	void Insert(Table& tableIn, tuper singleTuper);

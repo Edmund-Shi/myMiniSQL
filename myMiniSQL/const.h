@@ -7,4 +7,5 @@
 #define DELETED '#'
 #define NOTEMPTY 1
 #define MAXSTRINGLEN 100
+#define MIN_Theta 0.0001
 #endif

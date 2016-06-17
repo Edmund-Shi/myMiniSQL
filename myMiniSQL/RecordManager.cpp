@@ -5,43 +5,43 @@ RecordManager::~RecordManager()
 {
 }
 
-bool RecordManager::isSatisfied(Table& tableinfor, tuper row, vector<int> mask, where w)
+bool RecordManager::isSatisfied(Table& tableinfor, tuper row, vector<int> mask, vector<where> w)
 {
 	bool res = true;
 	for (int i = 0; i < mask.size();i++){
-		if (w.d == NULL){ //不存在where条件
+		if (w[i].d == NULL){ //不存在where条件
 			continue;
 		}
 		else if (row[mask[i]]->flag == -1) { //int
-			switch (w.flag) {
-			case eq: if (!(((Datai*)row[mask[i]])->x == ((Datai*)w.d)->x)) return false;break;
-			case leq: if (!(((Datai*)row[mask[i]])->x <= ((Datai*)w.d)->x)) return false; break;
-			case l: if (!(((Datai*)row[mask[i]])->x < ((Datai*)w.d)->x)) return false; break;
-			case geq: if (!(((Datai*)row[mask[i]])->x >= ((Datai*)w.d)->x)) return false; break;
-			case g: if (!(((Datai*)row[mask[i]])->x > ((Datai*)w.d)->x)) return false; break;
-			case neq: if (!(((Datai*)row[mask[i]])->x != ((Datai*)w.d)->x)) return false; break;
+			switch (w[i].flag) {
+			case eq: if (!(((Datai*)row[mask[i]])->x == ((Datai*)w[i].d)->x)) return false;break;
+			case leq: if (!(((Datai*)row[mask[i]])->x <= ((Datai*)w[i].d)->x)) return false; break;
+			case l: if (!(((Datai*)row[mask[i]])->x < ((Datai*)w[i].d)->x)) return false; break;
+			case geq: if (!(((Datai*)row[mask[i]])->x >= ((Datai*)w[i].d)->x)) return false; break;
+			case g: if (!(((Datai*)row[mask[i]])->x >((Datai*)w[i].d)->x)) return false; break;
+			case neq: if (!(((Datai*)row[mask[i]])->x != ((Datai*)w[i].d)->x)) return false; break;
 			default: ;
 			}
 		}
 		else if (row[mask[i]]->flag == 0) { //Float
-			switch (w.flag) {
-			case eq: if (!(((Dataf*)row[mask[i]])->x == ((Dataf*)w.d)->x)) return false; break;
-			case leq: if (!(((Dataf*)row[mask[i]])->x <= ((Dataf*)w.d)->x)) return false; break;
-			case l: if (!(((Dataf*)row[mask[i]])->x < ((Dataf*)w.d)->x)) return false; break;
-			case geq: if (!(((Dataf*)row[mask[i]])->x >= ((Dataf*)w.d)->x)) return false; break;
-			case g: if (!(((Dataf*)row[mask[i]])->x >((Dataf*)w.d)->x)) return false; break;
-			case neq: if (!(((Dataf*)row[mask[i]])->x != ((Dataf*)w.d)->x)) return false; break;
+			switch (w[i].flag) {
+			case eq: if (!(abs(((Dataf*)row[mask[i]])->x - ((Dataf*)w[i].d)->x)<MIN_Theta)) return false; break;
+			case leq: if (!(((Dataf*)row[mask[i]])->x <= ((Dataf*)w[i].d)->x)) return false; break;
+			case l: if (!(((Dataf*)row[mask[i]])->x < ((Dataf*)w[i].d)->x)) return false; break;
+			case geq: if (!(((Dataf*)row[mask[i]])->x >= ((Dataf*)w[i].d)->x)) return false; break;
+			case g: if (!(((Dataf*)row[mask[i]])->x >((Dataf*)w[i].d)->x)) return false; break;
+			case neq: if (!(((Dataf*)row[mask[i]])->x != ((Dataf*)w[i].d)->x)) return false; break;
 			default: ;
 			}
 		}
 		else if (row[mask[i]]->flag > 0){ //string
-			switch (w.flag) {
-			case eq: if (!(((Datac*)row[mask[i]])->x == ((Datac*)w.d)->x)) return false; break;
-			case leq: if (!(((Datac*)row[mask[i]])->x <= ((Datac*)w.d)->x)) return false; break;
-			case l: if (!(((Datac*)row[mask[i]])->x < ((Datac*)w.d)->x)) return false; break;
-			case geq: if (!(((Datac*)row[mask[i]])->x >= ((Datac*)w.d)->x)) return false; break;
-			case g: if (!(((Datac*)row[mask[i]])->x >((Datac*)w.d)->x)) return false; break;
-			case neq: if (!(((Datac*)row[mask[i]])->x != ((Datac*)w.d)->x)) return false; break;
+			switch (w[i].flag) {
+			case eq: if (!(((Datac*)row[mask[i]])->x == ((Datac*)w[i].d)->x)) return false; break;
+			case leq: if (!(((Datac*)row[mask[i]])->x <= ((Datac*)w[i].d)->x)) return false; break;
+			case l: if (!(((Datac*)row[mask[i]])->x < ((Datac*)w[i].d)->x)) return false; break;
+			case geq: if (!(((Datac*)row[mask[i]])->x >= ((Datac*)w[i].d)->x)) return false; break;
+			case g: if (!(((Datac*)row[mask[i]])->x >((Datac*)w[i].d)->x)) return false; break;
+			case neq: if (!(((Datac*)row[mask[i]])->x != ((Datac*)w[i].d)->x)) return false; break;
 			default: ;
 			}
 		}
@@ -145,11 +145,8 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 					temp_tuper->addData(new Datac(string(value)));
 				}
 			}//以上内容先从文件中生成一行tuper，一下判断是否满足要求
-            bool flag = true;
-            for(int k=0;k<w.size();k++)
-                if(!isSatisfied(tableIn, *temp_tuper, mask, w[k]))
-                    flag = false;
-			if (flag){
+                             
+			if (isSatisfied(tableIn,*temp_tuper,mask,w)){
 				tableIn.addData(temp_tuper); //可能会存在问题;solved!
 			}
 		}
@@ -282,13 +279,8 @@ int RecordManager::Delete(Table& tableIn, vector<int>mask, vector<where> w)
 					temp_tuper->addData(new Datac(string(value)));
 				}
 			}//以上内容先从文件中生成一行tuper，一下判断是否满足要求
-            
-            bool flag = true;
-            for(int k=0;k<w.size();k++)
-                if(!isSatisfied(tableIn, *temp_tuper, mask, w[k]))
-                    flag = false;
-            
-			if (flag){
+               
+			if (isSatisfied(tableIn,*temp_tuper,mask,w)){
 				buf_ptr->bufferBlock[bufferNum].values[position] = DELETED; //DELETED==EMYTP
 				buf_ptr->writeBlock(bufferNum);
 				count++;

@@ -425,6 +425,7 @@ void InterManager::EXEC_DELETE(){
     down.disptuper();
     */
     API api;
+	t->blockNum = 1;
     api.Delete(*t, attrwhere, w);
     delete t;
     
