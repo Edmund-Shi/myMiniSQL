@@ -59,5 +59,11 @@
     <ClInclude Include="RecordManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="IndexManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bptree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

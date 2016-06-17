@@ -1,5 +1,5 @@
 #include "RecordManager.h"
-
+#include "Interpreter.h"
 
 RecordManager::~RecordManager()
 {
@@ -202,6 +202,29 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect)
 
 void RecordManager::Insert(Table& tableIn, tuper singleTuper)
 {
+	
+	for (int i = 0; i < tableIn.attr.num;i++) {		
+		if (tableIn.attr.unique[i]){
+			vector<where> w;
+			vector<int> mask;
+			where *uni_w = new where;
+			uni_w->flag = eq;
+			switch (singleTuper[i]->flag) {
+			case -1:uni_w->d = new Datai(((Datai*)singleTuper[i])->x); break;
+			case 0:uni_w->d = new Dataf(((Dataf*)singleTuper[i])->x); break;
+			default:uni_w->d = new Datac(((Datac*)singleTuper[i])->x); break;
+			}
+			w.push_back(*uni_w);
+			mask.push_back(i);
+			Table temp_table(Select(tableIn, mask, mask, w));
+			if (temp_table.T.size() != 0) {
+				throw QueryException("Unique Value Redundancy occurs, thus insertion failed");
+				//cout << "Unique Value Redundancy occurs, thus insertion failed" << endl;
+				return;
+			}
+		}
+	}
+	
 	char *charTuper;
 	charTuper = Tuper2Char(tableIn, singleTuper);//把一个元组转换成字符串
 	//判断是否unique

@@ -93,7 +93,7 @@ public:
         }
         return res;
     }
-private:
+public:
     std::string Tname;
     Attribute attr;//number of attributes
 public:

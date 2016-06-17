@@ -75,9 +75,11 @@
   <ItemGroup>
     <ClInclude Include="API.h" />
     <ClInclude Include="base.h" />
+    <ClInclude Include="bptree.h" />
     <ClInclude Include="BufferManager.h" />
     <ClInclude Include="Catalog.h" />
     <ClInclude Include="const.h" />
+    <ClInclude Include="IndexManager.h" />
     <ClInclude Include="Interpreter.h" />
     <ClInclude Include="RecordManager.h" />
   </ItemGroup>
