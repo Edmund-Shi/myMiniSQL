@@ -3,7 +3,7 @@
 #include "base.h"
 #include "const.h"
 #include "BufferManager.h"
-
+#include "Catalog.h"
 class RecordManager
 {
 public:

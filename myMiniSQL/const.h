@@ -2,7 +2,7 @@
 #define _CONST_H
 
 #define BLOCKSIZE 4096
-#define MAXBLOCKNUM 2
+#define MAXBLOCKNUM 5
 #define EMPTY  '#'
 #define DELETED '#'
 #define NOTEMPTY 1

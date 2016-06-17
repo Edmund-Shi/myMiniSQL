@@ -1,5 +1,5 @@
 #include "BufferManager.h"
-
+#include "Catalog.h"
 
 BufferManager::BufferManager()
 {
@@ -138,6 +138,8 @@ int BufferManager::addBlockInFile(Table& tableinfor){
 	bufferBlock[bufferNum].filename = tableinfor.getname() + ".table";
 	bufferBlock[bufferNum].blockOffset = tableinfor.blockNum++;
 	bufferBlock[bufferNum].recent_time = clock();
+	CataManager ca;
+	ca.changeblock(tableinfor.getname(), tableinfor.blockNum);
 	return bufferNum;
 }
 

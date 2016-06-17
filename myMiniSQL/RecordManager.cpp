@@ -308,6 +308,9 @@ bool RecordManager::CreateTable(Table& tableIn)
 	string filename = tableIn.getname() + ".table";
 	fstream fout(filename.c_str(), ios::out);
 	fout.close();
+	tableIn.blockNum = 1;
+	CataManager Ca;
+	Ca.changeblock(tableIn.getname(), 1);
 	return true;
 }
 

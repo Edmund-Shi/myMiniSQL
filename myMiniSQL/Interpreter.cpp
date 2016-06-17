@@ -278,7 +278,7 @@ void InterManager::EXEC_INSERT(){
         throw qe;
         
     }
-    tb->blockNum = 1;
+    //tb->blockNum = 1;
     API api;
     api.Insert(*tb, *tp);
     
@@ -384,7 +384,7 @@ void InterManager::EXEC_SELECT(){
 */    
     
     API api;
-    t->blockNum = 1;
+    //t->blockNum = 1;
     Table output = api.Select(*t,attrselect, attrwhere, w);
     output.disp();
  //   throw std::bad_alloc();
@@ -425,7 +425,7 @@ void InterManager::EXEC_DELETE(){
     down.disptuper();
     */
     API api;
-	t->blockNum = 1;
+	//t->blockNum = 1;
     api.Delete(*t, attrwhere, w);
     delete t;
     
@@ -825,7 +825,7 @@ void InterManager::EXEC_FILE(){
         throw QueryException("No file named " + fname);
     qs = "";
     string temp;
-    while(!in.eof()){
+    while(in.peek()!=EOF){
         in >> temp;
         qs = qs + temp + " ";
         if(temp[temp.length()-1]==';'){
