@@ -192,10 +192,10 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect)
 					char value[MAXSTRINGLEN];
 					int strLen = tableIn.getattribute().flag[attr_index]+1;
 					memcpy(value, &(stringRow.c_str()[c_pos]), strLen);
-					c_pos += strLen;
+                    c_pos += strLen;
 					temp_tuper->addData(new Datac(string(value)));
 				}
-			}
+			}           
 			tableIn.addData(temp_tuper); //可能会存在问题;solved!
 		}
 	}
@@ -207,8 +207,8 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect)
 int RecordManager::FindWithIndex(Table& tableIn, tuper& row, int mask)
 {
 	IndexManager indexMA;
-	for (int i = 0; i < tableIn.index.num;i++) {
-		if (tableIn.index.location[i]==mask){ //找到索引
+	for (int i = 0; i < tableIn.index.num; i++) {
+		if (tableIn.index.location[i] == mask) { //找到索引
 			Data* ptrData;
 			ptrData = row[mask];
 			int pos = indexMA.Find(tableIn.getname() + ".index", ptrData);
@@ -234,14 +234,21 @@ void RecordManager::Insert(Table& tableIn, tuper& singleTuper)
 			}
 			w.push_back(*uni_w);
 			mask.push_back(i);
-			Table temp_table = Select(tableIn, mask, mask, w);
-            delete uni_w->d;
-            delete uni_w;
+			/*Table temp_table = Select(tableIn, mask, mask, w);
+            
             
 			if (temp_table.T.size() != 0) {
 				throw QueryException("Unique Value Redundancy occurs, thus insertion failed");
-				return;
-			}
+			}*/
+            //code by hrg
+            if(!UNIQUE(tableIn, w[0], i)){
+                throw QueryException("Unique Value Redundancy occurs, thus insertion failed");
+            }
+                
+            //code by hrg
+            
+            delete uni_w->d;
+            delete uni_w;
 		}
 	}
 
@@ -259,10 +266,10 @@ void RecordManager::Insert(Table& tableIn, tuper& singleTuper)
 
 void RecordManager::InsertWithIndex(Table& tableIn, tuper& singleTuper)
 {
-	for (int i = 0; i < tableIn.attr.num;i++) {
-		if (tableIn.attr.unique[i] == 1){
+	for (int i = 0; i < tableIn.attr.num; i++) {
+		if (tableIn.attr.unique[i] == 1) {
 			int addr = FindWithIndex(tableIn, singleTuper, i);
-			if (addr>=0){
+			if (addr >= 0) {
 				throw QueryException("Unique Value Redundancy occurs, thus insertion failed");
 				return;
 			}
@@ -275,7 +282,7 @@ void RecordManager::InsertWithIndex(Table& tableIn, tuper& singleTuper)
 	insertPos iPos = buf_ptr->getInsertPosition(tableIn);//获取插入位置
 	int length = tableIn.dataSize() + 1; //一个元组的信息在文档中的长度
 	for (int i = 0; i < tableIn.index.num; i++) {
-		indexMA.Insert(tableIn.getname() + ".index", singleTuper[tableIn.index.location[i]], iPos.position/length);
+		indexMA.Insert(tableIn.getname() + ".index", singleTuper[tableIn.index.location[i]], iPos.position / length);
 	}
 	buf_ptr->bufferBlock[iPos.bufferNUM].values[iPos.position] = NOTEMPTY;
 	memcpy(&(buf_ptr->bufferBlock[iPos.bufferNUM].values[iPos.position + 1]), charTuper, tableIn.dataSize());
@@ -451,4 +458,55 @@ tuper RecordManager::String2Tuper(Table& tableIn, string stringRow)
 	return temp_tuper;
 }
 
+
+bool RecordManager::UNIQUE(Table& tableIn, where w, int loca){
+    int length = tableIn.dataSize() + 1; //一个元组的信息在文档中的长度
+    const int recordNum = BLOCKSIZE / length; //一个block中存储的记录条数
+    string stringRow;
+    string filename = tableIn.getname() + ".table";
+    int attroff=1;
+    for(int i=0;i<loca-1;i++){
+        if(tableIn.attr.flag[i]==-1){
+            attroff += sizeof(int);
+        }
+        else if(tableIn.attr.flag[i]==0){
+            attroff += sizeof(float);
+        }
+        else{
+            attroff += sizeof(char)*tableIn.attr.flag[i];
+        }
+    }
+    int inflag = tableIn.attr.flag[loca];
+    for (int blockOffset = 0; blockOffset < tableIn.blockNum;blockOffset++){//读取整个文件中的所有内容
+        int bufferNum = buf_ptr->getIfIsInBuffer(filename, blockOffset);
+        if (bufferNum == -1){ //该块不再内存中，读取之
+            bufferNum = buf_ptr->getEmptyBuffer();
+            buf_ptr->readBlock(filename, blockOffset, bufferNum);
+        }
+        for (int offset = 0; offset < recordNum;offset++){
+            int position = offset * length + attroff;
+            if(inflag==-1){
+                int value;
+                memcpy(&value, &(bf.bufferBlock[bufferNum].values[position]), sizeof(int));
+                if(value==((Datai*)(w.d))->x)
+                    return false;
+            }
+            else if(inflag==0){
+                float value;
+                memcpy(&value, &(bf.bufferBlock[bufferNum].values[position]), sizeof(float));
+                if(value==((Dataf*)(w.d))->x)
+                    return false;
+            }
+            else{
+                char value[100];
+                memcpy(value, &(bf.bufferBlock[bufferNum].values[position]), tableIn.attr.flag[loca]+1);
+                if(string(value)==((Datac*)(w.d))->x)
+                    return false;
+            }
+
+        }
+    }
+                return true;
+    
+}
 

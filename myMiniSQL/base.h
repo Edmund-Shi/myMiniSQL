@@ -40,6 +40,8 @@ class Datac : public Data{
 public:
     Datac(std::string c):x(c){
         flag = c.length();
+        if(c.length()==0)
+            flag = 1;
     };
     virtual ~Datac(){}
     std::string x;
@@ -101,7 +103,6 @@ public:
     std::string Tname;
     Attribute attr;//number of attributes
 public:
-
     Table(std::string s,Attribute aa, int bn):Tname(s),attr(aa),blockNum(bn){
         primary = -1;
         for(int i = 0;i<32;i++){ aa.unique[i] = false; }

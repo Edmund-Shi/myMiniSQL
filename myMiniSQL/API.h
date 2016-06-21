@@ -15,7 +15,7 @@ public:
 	void Insert(Table& tableIn, tuper& singleTuper);
 	bool DropTable(Table& tableIn);
 	bool CreateTable(Table& tableIn);
-	bool CreateIndex(Table& tableIn,int attr);
+	bool CreateIndex(Table& tableIn, int attr);
 private:
 	RecordManager rm;
 };

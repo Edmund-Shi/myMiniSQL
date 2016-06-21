@@ -33,7 +33,7 @@ int InterManager::EXEC(){
     
     else if(qs.substr(0,6)=="insert"){
         EXEC_INSERT();
-        cout << "Interpreter: successful insert!" << endl;
+       // cout << "Interpreter: successful insert!" << endl;
         return 1;
     }
     
@@ -847,18 +847,18 @@ void InterManager::EXEC_FILE(){
             in >> temp;
             qs = qs + temp + " ";
             if(temp[temp.length()-1]==';'){
-                cout << qs << endl;
+             //   cout << qs << endl;
                 EXEC();
                 qs = "";
         }
         }
         catch(TableException te){
-           // cout << qs << endl;
+            cout << qs << endl;
             cout << te.what() << endl;
             qs = "";
         }
         catch(QueryException qe){
-        // cout << qs << endl;
+            cout << qs << endl;
             cout << qe.what() << endl;
             qs = "";
         }

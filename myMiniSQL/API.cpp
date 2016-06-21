@@ -21,7 +21,7 @@ int API::Delete(Table& tableIn, vector<int>mask, vector<where> w)
 void API::Insert(Table& tableIn, tuper& singleTuper)
 {
 	IndexManager indexMA;
-	
+
 	rm.InsertWithIndex(tableIn, singleTuper);
 }
 
@@ -38,13 +38,13 @@ bool API::CreateTable(Table& tableIn)
 	bool res;
 	int i;
 	res = rm.CreateTable(tableIn);
-	for ( i = 0; i < tableIn.attr.num;i++) {
-		if (tableIn.attr.unique[i] == 1){ //create index
+	for (i = 0; i < tableIn.attr.num; i++) {
+		if (tableIn.attr.unique[i] == 1) { //create index
 			break;
 		}
 	}
 	if (i < tableIn.attr.num) {
-		
+
 		CreateIndex(tableIn, i);
 	}
 	return res;
@@ -59,7 +59,7 @@ bool API::CreateIndex(Table& tableIn, int attr)
 	vector<int> attrSelect;
 	attrSelect.push_back(attr);
 	Table tableForindex(rm.Select(tableIn, attrSelect));
-	for (int i = 0; i < tableForindex.T.size();i++) {
+	for (int i = 0; i < tableForindex.T.size(); i++) {
 		indexMA.Insert(file_name, tableForindex.T[i]->data[attr], i);
 	}
 	return true;
