@@ -15,6 +15,7 @@ class Data{
 public:
     short flag;
     //-1-int 0-float 1~255-char.
+    virtual ~Data(){};
 };
 
 class Datai : public Data{
@@ -22,6 +23,7 @@ public:
     Datai(int i):x(i){
         flag = -1;
     };
+    virtual ~Datai(){}
     int x;
 };
 
@@ -30,6 +32,7 @@ public:
     Dataf(float f):x(f){
         flag = 0;
     };
+    virtual ~Dataf(){}
     float x;
 };
 
@@ -38,6 +41,7 @@ public:
     Datac(std::string c):x(c){
         flag = c.length();
     };
+    virtual ~Datac(){}
     std::string x;
 };
 
@@ -97,6 +101,7 @@ public:
     std::string Tname;
     Attribute attr;//number of attributes
 public:
+
     Table(std::string s,Attribute aa, int bn):Tname(s),attr(aa),blockNum(bn){
         primary = -1;
         for(int i = 0;i<32;i++){ aa.unique[i] = false; }

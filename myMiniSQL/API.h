@@ -4,6 +4,7 @@
 #include "base.h"
 #include "RecordManager.h"
 extern BufferManager bf;
+
 class API
 {
 public:
@@ -11,9 +12,10 @@ public:
 	~API();
 	Table Select(Table& tableIn, vector<int> attrSelect, vector<int>mask, vector<where> w);//return a table containing select results
 	int Delete(Table& tableIn, vector<int>mask, vector<where> w);
-	void Insert(Table& tableIn, tuper singleTuper);
+	void Insert(Table& tableIn, tuper& singleTuper);
 	bool DropTable(Table& tableIn);
 	bool CreateTable(Table& tableIn);
+	bool CreateIndex(Table& tableIn,int attr);
 private:
 	RecordManager rm;
 };

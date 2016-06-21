@@ -66,8 +66,10 @@
   <ItemGroup>
     <ClCompile Include="API.cpp" />
     <ClCompile Include="base.cpp" />
+    <ClCompile Include="bptree.cpp" />
     <ClCompile Include="BufferManager.cpp" />
     <ClCompile Include="Catalog.cpp" />
+    <ClCompile Include="IndexManager.cpp" />
     <ClCompile Include="Interpreter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RecordManager.cpp" />

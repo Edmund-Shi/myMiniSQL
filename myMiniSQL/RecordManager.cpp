@@ -1,11 +1,12 @@
 #include "RecordManager.h"
 #include "Interpreter.h"
-
+#include "IndexManager.h"
+#include <cmath>
 RecordManager::~RecordManager()
 {
 }
 
-bool RecordManager::isSatisfied(Table& tableinfor, tuper row, vector<int> mask, vector<where> w)
+bool RecordManager::isSatisfied(Table& tableinfor, tuper& row, vector<int> mask, vector<where> w)
 {
 	bool res = true;
 	for (int i = 0; i < mask.size();i++){
@@ -102,7 +103,7 @@ bool RecordManager::isSatisfied(Table& tableinfor, tuper row, vector<int> mask, 
 	return res;
 }
 
-Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>mask, vector<where> w)
+Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>mask, vector<where>& w)
 {
 	if (mask.size() == 0){
 		return Select(tableIn,attrSelect);
@@ -149,9 +150,10 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 			if (isSatisfied(tableIn,*temp_tuper,mask,w)){
 				tableIn.addData(temp_tuper); //可能会存在问题;solved!
 			}
+            else delete temp_tuper;
 		}
 	}
-	return SelectProject(tableIn,attrSelect);
+    return SelectProject(tableIn,attrSelect);
 }
 
 Table RecordManager::Select(Table& tableIn, vector<int>attrSelect)
@@ -200,7 +202,23 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect)
 	return SelectProject( tableIn, attrSelect);
 }
 
-void RecordManager::Insert(Table& tableIn, tuper singleTuper)
+
+
+int RecordManager::FindWithIndex(Table& tableIn, tuper& row, int mask)
+{
+	IndexManager indexMA;
+	for (int i = 0; i < tableIn.index.num;i++) {
+		if (tableIn.index.location[i]==mask){ //找到索引
+			Data* ptrData;
+			ptrData = row[mask];
+			int pos = indexMA.Find(tableIn.getname() + ".index", ptrData);
+			return pos;
+		}
+	}
+	return -1;
+}
+
+void RecordManager::Insert(Table& tableIn, tuper& singleTuper)
 {
 	
 	for (int i = 0; i < tableIn.attr.num;i++) {		
@@ -216,29 +234,60 @@ void RecordManager::Insert(Table& tableIn, tuper singleTuper)
 			}
 			w.push_back(*uni_w);
 			mask.push_back(i);
-			Table temp_table(Select(tableIn, mask, mask, w));
+			Table temp_table = Select(tableIn, mask, mask, w);
+            delete uni_w->d;
+            delete uni_w;
+            
 			if (temp_table.T.size() != 0) {
 				throw QueryException("Unique Value Redundancy occurs, thus insertion failed");
-				//cout << "Unique Value Redundancy occurs, thus insertion failed" << endl;
 				return;
 			}
 		}
 	}
-	
+
 	char *charTuper;
 	charTuper = Tuper2Char(tableIn, singleTuper);//把一个元组转换成字符串
 	//判断是否unique
 	insertPos iPos = buf_ptr->getInsertPosition(tableIn);//获取插入位置
+    
 	buf_ptr->bufferBlock[iPos.bufferNUM].values[iPos.position] = NOTEMPTY;
 	memcpy(&(buf_ptr->bufferBlock[iPos.bufferNUM].values[iPos.position + 1]), charTuper, tableIn.dataSize());
 	buf_ptr->writeBlock(iPos.bufferNUM);
+    delete[] charTuper;
+
 }
 
-char* RecordManager::Tuper2Char(Table& tableIn, tuper singleTuper)
+void RecordManager::InsertWithIndex(Table& tableIn, tuper& singleTuper)
+{
+	for (int i = 0; i < tableIn.attr.num;i++) {
+		if (tableIn.attr.unique[i] == 1){
+			int addr = FindWithIndex(tableIn, singleTuper, i);
+			if (addr>=0){
+				throw QueryException("Unique Value Redundancy occurs, thus insertion failed");
+				return;
+			}
+		}
+	}
+	//not unique
+	char *charTuper;
+	charTuper = Tuper2Char(tableIn, singleTuper);//把一个元组转换成字符串
+	IndexManager indexMA;
+	insertPos iPos = buf_ptr->getInsertPosition(tableIn);//获取插入位置
+	int length = tableIn.dataSize() + 1; //一个元组的信息在文档中的长度
+	for (int i = 0; i < tableIn.index.num; i++) {
+		indexMA.Insert(tableIn.getname() + ".index", singleTuper[tableIn.index.location[i]], iPos.position/length);
+	}
+	buf_ptr->bufferBlock[iPos.bufferNUM].values[iPos.position] = NOTEMPTY;
+	memcpy(&(buf_ptr->bufferBlock[iPos.bufferNUM].values[iPos.position + 1]), charTuper, tableIn.dataSize());
+	buf_ptr->writeBlock(iPos.bufferNUM);
+	delete[] charTuper;
+}
+
+char* RecordManager::Tuper2Char(Table& tableIn, tuper& singleTuper)
 {
 	char* ptrRes;
 	int pos = 0;//当前的插入位置
-	ptrRes = (char*)malloc((tableIn.dataSize() + 1)*sizeof(char));//额外的最后一位是0
+    ptrRes = new char[(tableIn.dataSize() + 1)*sizeof(char)];
 	for (int i = 0; i < tableIn.getattribute().num;i++){
 		if (tableIn.getattribute().flag[i] == -1){ //int
 			int value = ((Datai*)singleTuper[i])->x;

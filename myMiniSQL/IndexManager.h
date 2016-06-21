@@ -7,17 +7,14 @@
 #include"base.h"
 
 class IndexManager{
-private:
-	int index_num;
-	string* filename;
-	index* ind;
 public:
-	IndexManager();
-	void Establish(string file, Data* key, int Addr);
+	IndexManager(){};
+	void Establish(string file);
 	void Insert(string file, Data* key, int Addr);
 	void Delete(string file, Data* key);
 	int Find(string file, Data* key);
-	~IndexManager();
+	void Drop(string file);
+	~IndexManager(){};
 };
 
 #endif

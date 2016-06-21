@@ -9,11 +9,13 @@ class RecordManager
 public:
 	RecordManager(BufferManager *bf):buf_ptr(bf){}
 	~RecordManager();
-	bool isSatisfied(Table& tableinfor, tuper row, vector<int> mask, vector<where> w);
-	Table Select(Table& tableIn, vector<int>attrSelect, vector<int>mask, vector<where> w);
+	bool isSatisfied(Table& tableinfor, tuper& row, vector<int> mask, vector<where> w);
+	Table Select(Table& tableIn, vector<int>attrSelect, vector<int>mask, vector<where>& w);
 	Table Select(Table& tableIn, vector<int>attrSelect);
-	void Insert(Table& tableIn, tuper singleTuper);
-	char* Tuper2Char(Table& tableIn, tuper singleTuper);
+	int FindWithIndex(Table& tableIn, tuper& row, int mask);
+	void Insert(Table& tableIn, tuper& singleTuper);
+	void InsertWithIndex(Table& tableIn, tuper& singleTuper);
+	char* Tuper2Char(Table& tableIn, tuper& singleTuper);
 	int Delete(Table& tableIn, vector<int>mask, vector<where> w);
 	bool DropTable(Table& tableIn);
 	bool CreateTable(Table& tableIn);

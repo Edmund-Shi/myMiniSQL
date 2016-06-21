@@ -68,7 +68,7 @@ public:
 
 	friend class RecordManager;
 	friend class CataManager;
-private:
+//private:
 	buffer bufferBlock[MAXBLOCKNUM];
 };
 

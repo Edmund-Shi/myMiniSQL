@@ -247,13 +247,28 @@ void InterManager::EXEC_INSERT(){
             }
             //char
             else{
-                if(temp[0]!='\'' || temp[temp.length()-1]!='\'')
+                
+                
+                
+                
+                if(temp[0]!='\'')
                     throw QueryException("ERROR: " + temp + " is not a (string)");
+                while(qs[pos1+1]!=',' && qs[pos1-1]!='\'')
+                {
+                    pos = pos1+1;
+                    pos1 = GOGOGO(pos);
+                    temp += " ";
+                    temp += qs.substr(pos,pos1-pos);
+                }
+                
+                if(temp[temp.length()-1]!='\'')
+                    throw QueryException("ERROR: " + temp + " is not a (string)");
+                
 
                 temp.erase(temp.begin());
                 temp.erase(--temp.end());
-
                 dtemp = new Datac(temp);
+                //dtemp->flag = 1;
                 tp->addData(dtemp);
             }
             
@@ -290,6 +305,7 @@ void InterManager::EXEC_INSERT(){
     //debug
     
     delete tb;
+    delete tp;
 }
 
 void InterManager::EXEC_SELECT(){
@@ -826,13 +842,29 @@ void InterManager::EXEC_FILE(){
     qs = "";
     string temp;
     while(in.peek()!=EOF){
-        in >> temp;
-        qs = qs + temp + " ";
-        if(temp[temp.length()-1]==';'){
-            cout << qs << endl;
-            EXEC();
+        
+        try{
+            in >> temp;
+            qs = qs + temp + " ";
+            if(temp[temp.length()-1]==';'){
+                cout << qs << endl;
+                EXEC();
+                qs = "";
+        }
+        }
+        catch(TableException te){
+           // cout << qs << endl;
+            cout << te.what() << endl;
             qs = "";
         }
+        catch(QueryException qe){
+        // cout << qs << endl;
+            cout << qe.what() << endl;
+            qs = "";
+        }
+        
+        
+    
     }
     in.close();
 }

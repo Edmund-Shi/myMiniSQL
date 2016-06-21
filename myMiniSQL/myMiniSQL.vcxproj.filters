@@ -36,6 +36,12 @@
     <ClCompile Include="RecordManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="bptree.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IndexManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="API.h">
