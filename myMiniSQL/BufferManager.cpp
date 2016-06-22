@@ -19,7 +19,8 @@ void BufferManager::flashBack(int bufferNum)
 	if(!bufferBlock[bufferNum].isWritten) return;//如果没有被改写
 	//被改写
 	string filename = bufferBlock[bufferNum].filename;
-	fstream fout(filename.c_str(), ios::in | ios::out);
+	fstream fout;
+	fout.open(filename.c_str(), ios::in | ios::out);
 	fout.seekp(BLOCKSIZE*bufferBlock[bufferNum].blockOffset, fout.beg);
 	fout.write(bufferBlock[bufferNum].values, BLOCKSIZE);
 	bufferBlock[bufferNum].initialize();
@@ -43,8 +44,9 @@ void BufferManager::readBlock(string filename, int blockOffset, int bufferNum)
 	bufferBlock[bufferNum].filename = filename;
 	bufferBlock[bufferNum].blockOffset = blockOffset;
 	bufferBlock[bufferNum].recent_time = clock();
-	fstream  fin(filename.c_str(), ios::in);
-	fin.seekp(BLOCKSIZE*blockOffset, fin.beg);
+	fstream  fin;
+	fin.open(filename.c_str(), ios::in | ios::binary);
+	fin.seekp(BLOCKSIZE*blockOffset, ios::beg);
 	fin.read(bufferBlock[bufferNum].values, BLOCKSIZE);
 	fin.close();
 }

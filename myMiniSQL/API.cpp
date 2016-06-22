@@ -1,6 +1,7 @@
+
 #include "API.h"
 #include "IndexManager.h"
-
+// #API api.cpp
 API::~API()
 {
 }
@@ -20,8 +21,6 @@ int API::Delete(Table& tableIn, vector<int>mask, vector<where> w)
 
 void API::Insert(Table& tableIn, tuper& singleTuper)
 {
-	IndexManager indexMA;
-
 	rm.InsertWithIndex(tableIn, singleTuper);
 }
 
@@ -29,7 +28,18 @@ bool API::DropTable(Table& tableIn)
 {
 	bool res;
 	res = rm.DropTable(tableIn);
+	for (int i = 0; i < tableIn.index.num;i++) {
+		DropIndex(tableIn, tableIn.index.location[i]);
+	}
 	return res;
+}
+
+void API::DropIndex(Table& tableIn, int attr)
+{
+	IndexManager indexMA;
+	string filename;
+	filename = tableIn.Tname + to_string(attr) + ".index";
+	indexMA.Drop(filename);
 }
 
 bool API::CreateTable(Table& tableIn)
@@ -38,23 +48,14 @@ bool API::CreateTable(Table& tableIn)
 	bool res;
 	int i;
 	res = rm.CreateTable(tableIn);
-	for (i = 0; i < tableIn.attr.num; i++) {
-		if (tableIn.attr.unique[i] == 1) { //create index
-			break;
-		}
-	}
-	if (i < tableIn.attr.num) {
-
-		CreateIndex(tableIn, i);
-	}
-	return res;
+	return true;	
 }
 
 bool API::CreateIndex(Table& tableIn, int attr)
 {
 	IndexManager indexMA;
 	string file_name;
-	file_name = tableIn.getname() + ".index";
+	file_name = tableIn.getname() + to_string(attr)+  ".index";
 	indexMA.Establish(file_name);
 	vector<int> attrSelect;
 	attrSelect.push_back(attr);

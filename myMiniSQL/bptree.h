@@ -17,12 +17,12 @@
 using namespace std;
 
 enum nodetype{ Internal, Leaf };
-
+extern BufferManager bf;
 class index{
 public:
 	int Number;
 	int keylength[3];
-	BufferManager bf;
+	
 private:
 	int maxchild;
 	int order;

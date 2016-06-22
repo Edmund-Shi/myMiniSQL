@@ -295,13 +295,13 @@ void index::insert(Data* key, int Addr)
 				int buffernum = bf.GiveMeABlock(name, position);
 				memcpy(bf.bufferBlock[buffernum].values, newBlock, BLOCKSIZE);
 				bf.writeBlock(buffernum);
-				bf.flashBack(buffernum);
+				//bf.flashBack(buffernum);
 
 				*(int*)(currentBlock + MESSAGE + tempBro*(keylength[type] + POINTERLENGTH) + keylength[type] + 4) = Number - 1;
 				buffernum = bf.GiveMeABlock(name, *(int*)(currentBlock + 4));
 				memcpy(bf.bufferBlock[buffernum].values, currentBlock, BLOCKSIZE);
 				bf.writeBlock(buffernum);
-				bf.flashBack(buffernum);
+				//bf.flashBack(buffernum);
 				//writebuffer
 				return;
 			}
@@ -375,7 +375,7 @@ void index::insert(Data* key, int Addr)
 			int buffernum = bf.GiveMeABlock(name, *(int*)(currentBlock + 4));
 			memcpy(bf.bufferBlock[buffernum].values, currentBlock, BLOCKSIZE);
 			bf.writeBlock(buffernum);
-			bf.flashBack(buffernum);
+			//bf.flashBack(buffernum);
 			//writebuffer
 		}
 		else
@@ -421,12 +421,12 @@ int* index::split(char* currentBlock, Data* mid, Data* key, int Addr, int leftpo
 			int buffernum = bf.GiveMeABlock(name, *(int*)(newBlock1 + 4));
 			memcpy(bf.bufferBlock[buffernum].values, newBlock1, BLOCKSIZE);
 			bf.writeBlock(buffernum);
-			bf.flashBack(buffernum);
+			//bf.flashBack(buffernum);
 			//writebuffer
 			buffernum = bf.GiveMeABlock(name, *(int*)(newBlock2 + 4));
 			memcpy(bf.bufferBlock[buffernum].values, newBlock2, BLOCKSIZE);
 			bf.writeBlock(buffernum);
-			bf.flashBack(buffernum);
+			//bf.flashBack(buffernum);
 			//writebuffer
 			char* root = new char[BLOCKSIZE];
 			*(int*)(root) = Internal;
@@ -455,7 +455,7 @@ int* index::split(char* currentBlock, Data* mid, Data* key, int Addr, int leftpo
 			buffernum = bf.GiveMeABlock(name, *(int*)(root + 4));
 			memcpy(bf.bufferBlock[buffernum].values, root, BLOCKSIZE);
 			bf.writeBlock(buffernum);
-			bf.flashBack(buffernum);
+			//bf.flashBack(buffernum);
 			//writebuffer;root
 
 			father[0] = *(int*)(newBlock1 + 4);
@@ -505,18 +505,18 @@ int* index::split(char* currentBlock, Data* mid, Data* key, int Addr, int leftpo
 				buffernum = bf.GiveMeABlock(name, *(int*)(currentBlock + 4));
 				memcpy(bf.bufferBlock[buffernum].values, currentBlock, BLOCKSIZE);
 				bf.writeBlock(buffernum);
-				bf.flashBack(buffernum);
+				//bf.flashBack(buffernum);
 				//writebuffer
 
 				buffernum = bf.GiveMeABlock(name, *(int*)(newBlock1 + 4));
 				memcpy(bf.bufferBlock[buffernum].values, newBlock1, BLOCKSIZE);
 				bf.writeBlock(buffernum);
-				bf.flashBack(buffernum);
+				//bf.flashBack(buffernum);
 				//writebuffer
 				buffernum = bf.GiveMeABlock(name, *(int*)(newBlock2 + 4));
 				memcpy(bf.bufferBlock[buffernum].values, newBlock2, BLOCKSIZE);
 				bf.writeBlock(buffernum);
-				bf.flashBack(buffernum);
+				//bf.flashBack(buffernum);
 				//writebuffer
 
 				father[0] = *(int*)(newBlock1 + 4);
@@ -564,18 +564,18 @@ int* index::split(char* currentBlock, Data* mid, Data* key, int Addr, int leftpo
 				buffernum = bf.GiveMeABlock(name, *(int*)(currentBlock + 4));
 				memcpy(bf.bufferBlock[buffernum].values, currentBlock, BLOCKSIZE);
 				bf.writeBlock(buffernum);
-				bf.flashBack(buffernum);
+				//bf.flashBack(buffernum);
 				//writebuffer
 
 				buffernum = bf.GiveMeABlock(name, *(int*)(newBlock1 + 4));
 				memcpy(bf.bufferBlock[buffernum].values, newBlock1, BLOCKSIZE);
 				bf.writeBlock(buffernum);
-				bf.flashBack(buffernum);
+				//bf.flashBack(buffernum);
 				//writebuffer
 				buffernum = bf.GiveMeABlock(name, *(int*)(newBlock2 + 4));
 				memcpy(bf.bufferBlock[buffernum].values, newBlock2, BLOCKSIZE);
 				bf.writeBlock(buffernum);
-				bf.flashBack(buffernum);
+				//bf.flashBack(buffernum);
 				//writebuffer
 
 				father[0] = *(int*)(newBlock1 + 4);
@@ -596,7 +596,7 @@ int* index::split(char* currentBlock, Data* mid, Data* key, int Addr, int leftpo
 				buffernum = bf.GiveMeABlock(name, *(int*)(currentBlock + 4));
 				memcpy(bf.bufferBlock[buffernum].values, currentBlock, BLOCKSIZE);
 				bf.writeBlock(buffernum);
-				bf.flashBack(buffernum);
+				//bf.flashBack(buffernum);
 				//writebuffer
 				buffernum = bf.GiveMeABlock(name, 8);
 				father[0] = *(int*)(currentBlock + 4);

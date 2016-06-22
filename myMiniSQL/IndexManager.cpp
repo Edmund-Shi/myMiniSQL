@@ -45,7 +45,8 @@ int IndexManager::Find(string file, Data* key)
 	int re;
 	if (i.Number == 0)
 	{
-		throw TableException("The index is empty!");
+		return -1;//The index is empty, and return a "NULL" value! 
+		//throw TableException("The index is empty!");
 	}
 	else
 	{

@@ -1,3 +1,4 @@
+
 #include "RecordManager.h"
 #include "Interpreter.h"
 #include "IndexManager.h"
@@ -211,7 +212,7 @@ int RecordManager::FindWithIndex(Table& tableIn, tuper& row, int mask)
 		if (tableIn.index.location[i] == mask) { //找到索引
 			Data* ptrData;
 			ptrData = row[mask];
-			int pos = indexMA.Find(tableIn.getname() + ".index", ptrData);
+			int pos = indexMA.Find(tableIn.getname() + to_string(mask) + ".index", ptrData);
 			return pos;
 		}
 	}
@@ -220,7 +221,17 @@ int RecordManager::FindWithIndex(Table& tableIn, tuper& row, int mask)
 
 void RecordManager::Insert(Table& tableIn, tuper& singleTuper)
 {
-	
+	//check Redundancy using index
+	for (int i = 0; i < tableIn.attr.num; i++) {
+		if (tableIn.attr.unique[i] == 1) {
+			int addr = FindWithIndex(tableIn, singleTuper, i);
+			if (addr >= 0) { //already in the table 
+				throw QueryException("Unique Value Redundancy occurs, thus insertion failed");
+				return;
+			}
+		}
+	}
+
 	for (int i = 0; i < tableIn.attr.num;i++) {		
 		if (tableIn.attr.unique[i]){
 			vector<where> w;
@@ -259,6 +270,16 @@ void RecordManager::Insert(Table& tableIn, tuper& singleTuper)
     
 	buf_ptr->bufferBlock[iPos.bufferNUM].values[iPos.position] = NOTEMPTY;
 	memcpy(&(buf_ptr->bufferBlock[iPos.bufferNUM].values[iPos.position + 1]), charTuper, tableIn.dataSize());
+	int length = tableIn.dataSize() + 1; //一个元组的信息在文档中的长度
+	//insert tuper into index file
+	IndexManager indexMA;
+	int blockCapacity = BLOCKSIZE / length;
+	for (int i = 0; i < tableIn.index.num; i++) {
+		int tuperAddr = buf_ptr->bufferBlock[iPos.bufferNUM].blockOffset*blockCapacity + iPos.position / length; //the tuper's addr in the data file
+		for (int j = 0; j < tableIn.index.num; j++) {
+			indexMA.Insert(tableIn.getname() + to_string(tableIn.index.location[j]) + ".index", singleTuper[tableIn.index.location[i]], tuperAddr);
+		}
+	}
 	buf_ptr->writeBlock(iPos.bufferNUM);
     delete[] charTuper;
 
@@ -266,26 +287,65 @@ void RecordManager::Insert(Table& tableIn, tuper& singleTuper)
 
 void RecordManager::InsertWithIndex(Table& tableIn, tuper& singleTuper)
 {
+	//check Redundancy using index
 	for (int i = 0; i < tableIn.attr.num; i++) {
 		if (tableIn.attr.unique[i] == 1) {
 			int addr = FindWithIndex(tableIn, singleTuper, i);
-			if (addr >= 0) {
+			if (addr >= 0) { //already in the table 
 				throw QueryException("Unique Value Redundancy occurs, thus insertion failed");
 				return;
 			}
 		}
 	}
-	//not unique
+
+	for (int i = 0; i < tableIn.attr.num; i++) {
+		if (tableIn.attr.unique[i]) {
+			vector<where> w;
+			vector<int> mask;
+			where *uni_w = new where;
+			uni_w->flag = eq;
+			switch (singleTuper[i]->flag) {
+			case -1:uni_w->d = new Datai(((Datai*)singleTuper[i])->x); break;
+			case 0:uni_w->d = new Dataf(((Dataf*)singleTuper[i])->x); break;
+			default:uni_w->d = new Datac(((Datac*)singleTuper[i])->x); break;
+			}
+			w.push_back(*uni_w);
+			mask.push_back(i);
+			/*Table temp_table = Select(tableIn, mask, mask, w);
+
+
+			if (temp_table.T.size() != 0) {
+			throw QueryException("Unique Value Redundancy occurs, thus insertion failed");
+			}*/
+			//code by hrg
+			if (!UNIQUE(tableIn, w[0], i)) {
+				throw QueryException("Unique Value Redundancy occurs, thus insertion failed");
+			}
+
+			//code by hrg
+
+			delete uni_w->d;
+			delete uni_w;
+		}
+	}
+
 	char *charTuper;
 	charTuper = Tuper2Char(tableIn, singleTuper);//把一个元组转换成字符串
-	IndexManager indexMA;
+	//判断是否unique
 	insertPos iPos = buf_ptr->getInsertPosition(tableIn);//获取插入位置
-	int length = tableIn.dataSize() + 1; //一个元组的信息在文档中的长度
-	for (int i = 0; i < tableIn.index.num; i++) {
-		indexMA.Insert(tableIn.getname() + ".index", singleTuper[tableIn.index.location[i]], iPos.position / length);
-	}
+
 	buf_ptr->bufferBlock[iPos.bufferNUM].values[iPos.position] = NOTEMPTY;
 	memcpy(&(buf_ptr->bufferBlock[iPos.bufferNUM].values[iPos.position + 1]), charTuper, tableIn.dataSize());
+	int length = tableIn.dataSize() + 1; //一个元组的信息在文档中的长度
+	//insert tuper into index file
+	IndexManager indexMA;
+	int blockCapacity = BLOCKSIZE / length;
+	for (int i = 0; i < tableIn.index.num; i++) {
+		int tuperAddr = buf_ptr->bufferBlock[iPos.bufferNUM].blockOffset*blockCapacity + iPos.position / length; //the tuper's addr in the data file
+		for (int j = 0; j < tableIn.index.num; j++) {
+			indexMA.Insert(tableIn.getname() + to_string(tableIn.index.location[j]) + ".index", singleTuper[tableIn.index.location[i]], tuperAddr);
+		}
+	}
 	buf_ptr->writeBlock(iPos.bufferNUM);
 	delete[] charTuper;
 }
@@ -487,19 +547,19 @@ bool RecordManager::UNIQUE(Table& tableIn, where w, int loca){
             int position = offset * length + attroff;
             if(inflag==-1){
                 int value;
-                memcpy(&value, &(bf.bufferBlock[bufferNum].values[position]), sizeof(int));
+                memcpy(&value, &(bf.bufferBlock[bufferNum].values[position+4]), sizeof(int));
                 if(value==((Datai*)(w.d))->x)
                     return false;
             }
             else if(inflag==0){
                 float value;
-                memcpy(&value, &(bf.bufferBlock[bufferNum].values[position]), sizeof(float));
+                memcpy(&value, &(bf.bufferBlock[bufferNum].values[position+4]), sizeof(float));
                 if(value==((Dataf*)(w.d))->x)
                     return false;
             }
             else{
                 char value[100];
-                memcpy(value, &(bf.bufferBlock[bufferNum].values[position]), tableIn.attr.flag[loca]+1);
+                memcpy(value, &(bf.bufferBlock[bufferNum].values[position+4]), tableIn.attr.flag[loca]+1);
                 if(string(value)==((Datac*)(w.d))->x)
                     return false;
             }
